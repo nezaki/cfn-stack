@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Create S3 and CloudFront Resources For Freekey
+Description: Create S3 and CloudFront Resources
 
 Parameters:
   EnvironmentName:
