@@ -1,0 +1,280 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create AWS CloudFormation
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+
+  SystemName:
+    Description: Name of this system.
+    Type: String
+
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.1.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-vpc01
+
+  SubnetPublic1a:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: 'ap-northeast-1a'
+      CidrBlock: 10.1.0.0/20
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-subnet-a01
+
+  SubnetPublic1c:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: 'ap-northeast-1c'
+      CidrBlock: 10.1.16.0/20
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-subnet-c01
+
+  SubnetPrivate1a:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-1a
+      CidrBlock: 10.1.32.0/20
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-a01
+
+  SubnetPrivate1c:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-1c
+      CidrBlock: 10.1.48.0/20
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-c01
+
+  SubnetPrivate2a:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-1a
+      CidrBlock: 10.1.64.0/20
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-a02
+
+  SubnetPrivate2c:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: ap-northeast-1c
+      CidrBlock: 10.1.80.0/20
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-c02
+
+  PublicRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-route
+
+  PublicRouteTableC:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-route-c
+
+  PrivateRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-route
+
+  PrivateRouteTableC:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-route-c
+
+  PublicSubnetRouteTableAssociation1a:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetPublic1a
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetRouteTableAssociation1c:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetPublic1c
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetRouteTableAssociation1a:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetPrivate1a
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetRouteTableAssociation1c:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetPrivate1c
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetRouteTableAssociation2a:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetPrivate2a
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetRouteTableAssociation2c:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref SubnetPrivate2c
+      RouteTableId: !Ref PrivateRouteTable
+
+  SecurityGroupAPI:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-${SystemName}-sg-api
+      GroupDescription: !Sub ${EnvironmentName}-${SystemName}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - CidrIp: 10.1.0.0/16
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: tcp
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: tcp
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-sg-api
+
+  SecurityGroupMySQL:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-${SystemName}-sg-mysql
+      GroupDescription: !Sub ${EnvironmentName}-${SystemName}
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - CidrIp: 10.1.0.0/16
+          FromPort: 3306
+          ToPort: 3306
+          IpProtocol: tcp
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: tcp
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-sg-mysql
+
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: {}
+
+  VPCGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  InternetGatewayRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  NatGateway:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt
+        - NatGatewayElasticIP
+        - AllocationId
+      SubnetId: !Ref SubnetPublic1a
+
+  NatGatewayElasticIP:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: !Ref VPC
+
+  NatGatewayRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+Outputs:
+  VpcId:
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${EnvironmentName}-VPC
+
+  VpcCidr:
+    Value: 10.1.0.0/16
+    Export:
+      Name: !Sub ${EnvironmentName}-VPCCidr
+
+  SubnetPublic1aId:
+    Value: !Ref SubnetPublic1a
+    Export:
+      Name: !Sub ${EnvironmentName}-SubnetPublic1a
+
+  SubnetPublic1cId:
+    Value: !Ref SubnetPublic1c
+    Export:
+      Name: !Sub ${EnvironmentName}-SubnetPublic1c
+
+  SubnetPrivate1aId:
+    Value: !Ref SubnetPrivate1a
+    Export:
+      Name: !Sub ${EnvironmentName}-SubnetPrivate1a
+
+  SubnetPrivate1cId:
+    Value: !Ref SubnetPrivate1c
+    Export:
+      Name: !Sub ${EnvironmentName}-SubnetPrivate1c
+
+  SubnetPrivate2aId:
+    Value: !Ref SubnetPrivate2a
+    Export:
+      Name: !Sub ${EnvironmentName}-SubnetPrivate2a
+
+  SubnetPrivate2cId:
+    Value: !Ref SubnetPrivate2c
+    Export:
+      Name: !Sub ${EnvironmentName}-SubnetPrivate2c
+
+  SecurityGroupMySQLId:
+    Value: !Ref SecurityGroupMySQL
+    Export:
+      Name: !Sub ${EnvironmentName}-SecurityGroupMySQL
