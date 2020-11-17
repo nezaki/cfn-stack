@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create EC2 Resources
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+
+  SystemName:
+    Description: Name of this system.
+    Type: String
+    
+  KeyPair:
+    Description: KeyPair Name
+    Type: AWS::EC2::KeyPair::KeyName
+    
+  EC2InstanceAMI:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2" 
+
+Resources:
+  SecurityGroupBastion:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-${SystemName}-sg-bastion
+      GroupDescription: !Sub ${EnvironmentName}-${SystemName}
+      VpcId: 
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: tcp
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: tcp
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-sg-bastion
+  
+  EC2InstanceBastion:
+    Type: AWS::EC2::Instance
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: '/dev/xvda'
+          Ebs:
+            VolumeType: gp2
+            VolumeSize: 10
+      ImageId: !Ref EC2InstanceAMI
+      InstanceInitiatedShutdownBehavior: stop
+      InstanceType: t3.micro
+      KeyName: !Ref KeyPair
+      Monitoring: false
+      SecurityGroupIds:
+        - !GetAtt SecurityGroupBastion.GroupId
+      SubnetId: 
+        Fn::ImportValue: !Sub ${EnvironmentName}-SubnetPublic1a
+      Tenancy: default
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum -y update
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-bastion
+  
+  ElasticIpBastion:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  
+  IPAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref EC2InstanceBastion
+      EIP: !Ref ElasticIpBastion
