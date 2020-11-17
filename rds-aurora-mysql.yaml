@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Create RDS Resources
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+
+  SystemName:
+    Description: Name of this system.
+    Type: String
+
+  DBMasterUserName:
+    Description: Please enter the name of the master user on an RDS.
+    Type: String
+
+  DBName:
+    Description: Please enter the name of the Database Name.
+    Type: String
+
+Resources:
+  AuroraMasterPassword:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        GenerateStringKey: password
+        PasswordLength: 16
+        SecretStringTemplate: !Sub "{\"username\":\"${DBMasterUserName}\"}"
+        ExcludeCharacters: "\"@/\\"
+
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: RDS DB parameter group the Aurora Cluster's instance(s).
+      Family: aurora-mysql5.7
+
+  DBClusterParameterGroup:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: RDS DB cluster parameter group
+      Family: aurora-mysql5.7
+      Parameters:
+        character_set_client: utf8
+        character_set_connection: utf8
+        character_set_database: utf8
+        character_set_filesystem: utf8
+        character_set_results: utf8
+        character_set_server: utf8
+        collation_connection: utf8_general_ci
+        collation_server: utf8_general_ci
+
+  DBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${EnvironmentName}-${SystemName}-sg-mysql
+      GroupDescription: !Sub ${EnvironmentName}-${SystemName}
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+      SecurityGroupIngress:
+        - CidrIp: 10.1.0.0/16
+          FromPort: 3306
+          ToPort: 3306
+          IpProtocol: tcp
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: tcp
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-sg-mysql
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub ${EnvironmentName}-${SystemName}
+      SubnetIds:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-SubnetPrivate2a
+        - Fn::ImportValue: !Sub ${EnvironmentName}-SubnetPrivate2c
+
+  DBCluster:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Delete
+    Properties:
+      Engine: aurora-mysql
+      EngineVersion: "5.7.mysql_aurora.2.09.0"
+      DeletionProtection: false
+      EnableCloudwatchLogsExports:
+         - general
+         - error
+         - slowquery
+         - audit
+      DBClusterIdentifier: !Sub ${EnvironmentName}-${SystemName}-cluster
+      DatabaseName: !Ref DBName
+      MasterUsername: !Ref DBMasterUserName
+      MasterUserPassword: !Sub "{{resolve:secretsmanager:${AuroraMasterPassword}:SecretString:password::}}"
+      BackupRetentionPeriod: 7
+      PreferredBackupWindow: 18:00-19:00
+      PreferredMaintenanceWindow: tue:19:30-tue:20:00
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBClusterParameterGroupName: !Ref DBClusterParameterGroup
+      VpcSecurityGroupIds:
+        - !Ref DBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-cluster
+
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: aurora-mysql
+      DBClusterIdentifier: !Ref DBCluster
+      DBInstanceClass: db.t3.small
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBParameterGroupName: !Ref DBParameterGroup
+      DBInstanceIdentifier : !Sub ${EnvironmentName}-${SystemName}-instance1
+      AllowMajorVersionUpgrade: false
+      AutoMinorVersionUpgrade: false
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-${SystemName}-instance
+
+  AuroraSecretAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref AuroraMasterPassword
+      TargetId: !Ref DBCluster
+      TargetType: AWS::RDS::DBCluster
