@@ -237,44 +237,44 @@ Outputs:
   VpcId:
     Value: !Ref VPC
     Export:
-      Name: !Sub ${EnvironmentName}-VPC
+      Name: !Sub ${EnvironmentName}-${SystemName}-VPC
 
   VpcCidr:
     Value: 10.1.0.0/16
     Export:
-      Name: !Sub ${EnvironmentName}-VPCCidr
+      Name: !Sub ${EnvironmentName}-${SystemName}-VPCCidr
 
   SubnetPublic1aId:
     Value: !Ref SubnetPublic1a
     Export:
-      Name: !Sub ${EnvironmentName}-SubnetPublic1a
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic1a
 
   SubnetPublic1cId:
     Value: !Ref SubnetPublic1c
     Export:
-      Name: !Sub ${EnvironmentName}-SubnetPublic1c
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic1c
 
   SubnetPrivate1aId:
     Value: !Ref SubnetPrivate1a
     Export:
-      Name: !Sub ${EnvironmentName}-SubnetPrivate1a
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate1a
 
   SubnetPrivate1cId:
     Value: !Ref SubnetPrivate1c
     Export:
-      Name: !Sub ${EnvironmentName}-SubnetPrivate1c
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate1c
 
   SubnetPrivate2aId:
     Value: !Ref SubnetPrivate2a
     Export:
-      Name: !Sub ${EnvironmentName}-SubnetPrivate2a
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate2a
 
   SubnetPrivate2cId:
     Value: !Ref SubnetPrivate2c
     Export:
-      Name: !Sub ${EnvironmentName}-SubnetPrivate2c
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate2c
 
   SecurityGroupMySQLId:
     Value: !Ref SecurityGroupMySQL
     Export:
-      Name: !Sub ${EnvironmentName}-SecurityGroupMySQL
+      Name: !Sub ${EnvironmentName}-${SystemName}-SecurityGroupMySQL
