@@ -65,7 +65,7 @@ Resources:
       Schema:
         - Name: email
           AttributeDataType: String
-          Mutable: false
+          Mutable: true
           Required: true
       UsernameConfiguration:
         CaseSensitive: True
