@@ -65,8 +65,8 @@ Resources:
       Schema:
         - Name: email
           AttributeDataType: String
-          Mutable: true
-          Required: true
+          Mutable: false
+          Required: false
       UsernameConfiguration:
         CaseSensitive: True
       UserPoolName: !Sub ${EnvironmentName}-${SystemName}
