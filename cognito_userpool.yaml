@@ -58,10 +58,6 @@ Resources:
           RequireUppercase: true
           RequireNumbers: true
           RequireSymbols: true
-      SmsConfiguration:
-        ExternalId: !Sub ${EnvironmentName}-${SystemName}-external
-        SnsCallerArn: !GetAtt SNSRole.Arn
-      SmsVerificationMessage: 認証コードは {####} です
       Schema:
         - Name: email
           AttributeDataType: String
