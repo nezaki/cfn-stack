@@ -49,7 +49,7 @@ Resources:
       EmailVerificationMessage: Eメールアドレスを検証するには、次のリンクをクリックしてください。{####}
       EmailVerificationSubject: 検証リンク
       EnabledMfas:
-        - SMS_MFA
+        - SOFTWARE_TOKEN_MFA
       MfaConfiguration: OPTIONAL
       Policies:
         PasswordPolicy:
