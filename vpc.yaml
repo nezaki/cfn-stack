@@ -1,3 +1,15 @@
+#  export AWS_ACCESS_KEY_ID=
+#  export AWS_SECRET_ACCESS_KEY=
+#
+#  export EnvironmentName=dev
+#  export SystemName=test
+#
+#  aws cloudformation create-stack \
+#      --template-body file:///path/to/cfn-stack/vpc.yaml \
+#      --stack-name ${EnvironmentName}-vpc \
+#      --parameters ParameterKey=EnvironmentName,ParameterValue=$EnvironmentName \
+#                   ParameterKey=SystemName,ParameterValue=$SystemName
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Create AWS CloudFormation
 
@@ -21,139 +33,157 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName}-${SystemName}-vpc01
 
-  SubnetPublic1a:
+  SubnetPublic0101:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: 'ap-northeast-1a'
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
       CidrBlock: 10.1.0.0/20
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-public-subnet-a01
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-subnet-01-01
 
-  SubnetPublic1c:
+  SubnetPublic0201:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: 'ap-northeast-1c'
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
       CidrBlock: 10.1.16.0/20
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-public-subnet-c01
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-subnet-02-01
 
-  SubnetPrivate1a:
+  SubnetPrivate0101:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: ap-northeast-1a
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
       CidrBlock: 10.1.32.0/20
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-a01
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-01-01
 
-  SubnetPrivate1c:
+  SubnetPrivate0201:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: ap-northeast-1c
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
       CidrBlock: 10.1.48.0/20
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-c01
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-02-01
 
-  SubnetPrivate2a:
+  SubnetPrivate0102:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: ap-northeast-1a
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
       CidrBlock: 10.1.64.0/20
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-a02
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-01-02
 
-  SubnetPrivate2c:
+  SubnetPrivate0202:
     Type: 'AWS::EC2::Subnet'
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: ap-northeast-1c
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
       CidrBlock: 10.1.80.0/20
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-c02
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-subnet-02-02
 
-  PublicRouteTable:
+  PublicRouteTable01:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-public-route
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-route-01
 
-  PublicRouteTableC:
+  PublicRouteTable02:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-public-route-c
+          Value: !Sub ${EnvironmentName}-${SystemName}-public-route-02
 
-  PrivateRouteTable:
+  PrivateRouteTable01:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-private-route
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-route-01
 
-  PrivateRouteTableC:
+  PrivateRouteTable02:
     Type: 'AWS::EC2::RouteTable'
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-private-route-c
+          Value: !Sub ${EnvironmentName}-${SystemName}-private-route-02
 
-  PublicSubnetRouteTableAssociation1a:
+  PublicSubnetRouteTableAssociation0101:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref SubnetPublic1a
-      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref SubnetPublic0101
+      RouteTableId: !Ref PublicRouteTable01
 
-  PublicSubnetRouteTableAssociation1c:
+  PublicSubnetRouteTableAssociation0201:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref SubnetPublic1c
-      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref SubnetPublic0201
+      RouteTableId: !Ref PublicRouteTable02
 
-  PrivateSubnetRouteTableAssociation1a:
+  PrivateSubnetRouteTableAssociation0101:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref SubnetPrivate1a
-      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref SubnetPrivate0101
+      RouteTableId: !Ref PrivateRouteTable01
 
-  PrivateSubnetRouteTableAssociation1c:
+  PrivateSubnetRouteTableAssociation0201:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref SubnetPrivate1c
-      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref SubnetPrivate0201
+      RouteTableId: !Ref PrivateRouteTable02
 
-  PrivateSubnetRouteTableAssociation2a:
+  PrivateSubnetRouteTableAssociation0102:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref SubnetPrivate2a
-      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref SubnetPrivate0102
+      RouteTableId: !Ref PrivateRouteTable01
 
-  PrivateSubnetRouteTableAssociation2c:
+  PrivateSubnetRouteTableAssociation0202:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
-      SubnetId: !Ref SubnetPrivate2c
-      RouteTableId: !Ref PrivateRouteTable
+      SubnetId: !Ref SubnetPrivate0202
+      RouteTableId: !Ref PrivateRouteTable02
 
   SecurityGroupAPI:
     Type: 'AWS::EC2::SecurityGroup'
@@ -209,7 +239,7 @@ Resources:
     Type: 'AWS::EC2::Route'
     DependsOn: VPCGatewayAttachment
     Properties:
-      RouteTableId: !Ref PublicRouteTable
+      RouteTableId: !Ref PublicRouteTable01
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
@@ -219,7 +249,7 @@ Resources:
       AllocationId: !GetAtt
         - NatGatewayElasticIP
         - AllocationId
-      SubnetId: !Ref SubnetPublic1a
+      SubnetId: !Ref SubnetPublic0101
 
   NatGatewayElasticIP:
     Type: 'AWS::EC2::EIP'
@@ -229,7 +259,7 @@ Resources:
   NatGatewayRoute:
     Type: 'AWS::EC2::Route'
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable01
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
 
@@ -244,35 +274,35 @@ Outputs:
     Export:
       Name: !Sub ${EnvironmentName}-${SystemName}-VPCCidr
 
-  SubnetPublic1aId:
-    Value: !Ref SubnetPublic1a
+  SubnetPublic0101Id:
+    Value: !Ref SubnetPublic0101
     Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic1a
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic0101
 
-  SubnetPublic1cId:
-    Value: !Ref SubnetPublic1c
+  SubnetPublic0201Id:
+    Value: !Ref SubnetPublic0201
     Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic1c
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic0201
 
-  SubnetPrivate1aId:
-    Value: !Ref SubnetPrivate1a
+  SubnetPrivate0101Id:
+    Value: !Ref SubnetPrivate0101
     Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate1a
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate0101
 
-  SubnetPrivate1cId:
-    Value: !Ref SubnetPrivate1c
+  SubnetPrivate0201Id:
+    Value: !Ref SubnetPrivate0201
     Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate1c
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate0201
 
-  SubnetPrivate2aId:
-    Value: !Ref SubnetPrivate2a
+  SubnetPrivate0102Id:
+    Value: !Ref SubnetPrivate0102
     Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate2a
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate0102
 
-  SubnetPrivate2cId:
-    Value: !Ref SubnetPrivate2c
+  SubnetPrivate0202Id:
+    Value: !Ref SubnetPrivate0202
     Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate2c
+      Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate0202
 
   SecurityGroupMySQLId:
     Value: !Ref SecurityGroupMySQL
