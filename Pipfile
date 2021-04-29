@@ -13,3 +13,4 @@ pre-commit = "*"
 python_version = "3.9"
 
 [scripts]
+cfn-lint = "cfn-lint --template *.yaml --region ap-northeast-1"
