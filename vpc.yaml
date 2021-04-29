@@ -205,26 +205,6 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName}-${SystemName}-sg-api
 
-  SecurityGroupMySQL:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupName: !Sub ${EnvironmentName}-${SystemName}-sg-mysql
-      GroupDescription: !Sub ${EnvironmentName}-${SystemName}
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - CidrIp: 10.1.0.0/16
-          FromPort: 3306
-          ToPort: 3306
-          IpProtocol: tcp
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          FromPort: 0
-          ToPort: 65535
-          IpProtocol: tcp
-      Tags:
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-sg-mysql
-
   InternetGateway:
     Type: 'AWS::EC2::InternetGateway'
     Properties: {}
@@ -303,8 +283,3 @@ Outputs:
     Value: !Ref SubnetPrivate0202
     Export:
       Name: !Sub ${EnvironmentName}-${SystemName}-SubnetPrivate0202
-
-  SecurityGroupMySQLId:
-    Value: !Ref SecurityGroupMySQL
-    Export:
-      Name: !Sub ${EnvironmentName}-${SystemName}-SecurityGroupMySQL

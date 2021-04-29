@@ -7,7 +7,7 @@
 #  export DBName=db
 #
 #  aws cloudformation create-stack \
-#      --template-body file:///path/to/cfn-stack/rds-aurora-mysql.yaml \
+#      --template-body file:///path/to/cfn-stack/rds-aurora-serverless.yaml \
 #      --stack-name ${EnvironmentName}-rds \
 #      --parameters ParameterKey=EnvironmentName,ParameterValue=$EnvironmentName \
 #                   ParameterKey=SystemName,ParameterValue=$SystemName \
@@ -101,12 +101,13 @@ Resources:
     Properties:
       Engine: aurora-mysql
       EngineVersion: "5.7.mysql_aurora.2.09.2"
+      EngineMode: serverless
+      ScalingConfiguration:
+        AutoPause: true
+        SecondsUntilAutoPause: 3600
+        MaxCapacity: 1
+        MinCapacity: 1
       DeletionProtection: false
-      EnableCloudwatchLogsExports:
-         - general
-         - error
-         - slowquery
-         - audit
       DBClusterIdentifier: !Sub ${EnvironmentName}-${SystemName}-cluster
       DatabaseName: !Ref DBName
       MasterUsername: !Ref DBMasterUserName
@@ -121,21 +122,6 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-${SystemName}-cluster
-
-  DBInstance:
-    Type: AWS::RDS::DBInstance
-    Properties:
-      Engine: aurora-mysql
-      DBClusterIdentifier: !Ref DBCluster
-      DBInstanceClass: db.t3.small
-      DBSubnetGroupName: !Ref DBSubnetGroup
-      DBParameterGroupName: !Ref DBParameterGroup
-      DBInstanceIdentifier : !Sub ${EnvironmentName}-${SystemName}-instance1
-      AllowMajorVersionUpgrade: false
-      AutoMinorVersionUpgrade: false
-      Tags:
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-${SystemName}-instance
 
   AuroraSecretAttachment:
     Type: AWS::SecretsManager::SecretTargetAttachment
