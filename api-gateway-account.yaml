@@ -13,6 +13,7 @@ Resources:
   AmazonAPIGatewayPushToCloudWatchLogsRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: api-gateway-logs-role
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
 
