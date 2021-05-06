@@ -2,7 +2,7 @@
 # export AWS_SECRET_ACCESS_KEY=
 #
 # aws cloudformation create-stack \
-#     --template-body file:///Users/nezaki/github-repo/nezaki/cfn-stack/api-gateway-account.yaml \
+#     --template-body file:///path/to/cfn-stack/api-gateway-account.yaml \
 #     --stack-name ${EnvironmentName}-api-gateway-account \
 #     --capabilities CAPABILITY_NAMED_IAM
 
