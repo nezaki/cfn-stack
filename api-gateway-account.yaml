@@ -1,3 +1,11 @@
+# export AWS_ACCESS_KEY_ID=
+# export AWS_SECRET_ACCESS_KEY=
+#
+# aws cloudformation create-stack \
+#     --template-body file:///Users/nezaki/github-repo/nezaki/cfn-stack/api-gateway-account.yaml \
+#     --stack-name ${EnvironmentName}-api-gateway-account \
+#     --capabilities CAPABILITY_NAMED_IAM
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Create API Gateway Push Cloudwatch Logs
 
@@ -5,16 +13,6 @@ Resources:
   AmazonAPIGatewayPushToCloudWatchLogsRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: api-gateway-logs-role
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - apigateway.amazonaws.com
-            Action:
-              - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
 
