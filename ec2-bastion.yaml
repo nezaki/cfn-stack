@@ -1,3 +1,21 @@
+# export AWS_ACCESS_KEY_ID=
+# export AWS_SECRET_ACCESS_KEY=
+#
+# export EnvironmentName=dev
+# export SystemName=test
+#
+# aws ec2 create-key-pair \
+#     --key-name ${EnvironmentName}-${SystemName}-bastion \
+#     --query 'KeyMaterial' \
+#     --output text > ${EnvironmentName}-${SystemName}-bastion.pem
+#
+# aws cloudformation create-stack \
+#     --template-body file:///path/to/cfn-stack/ec2-bastion.yaml \
+#     --stack-name ${EnvironmentName}-ec2-bastion \
+#     --parameters ParameterKey=EnvironmentName,ParameterValue=$EnvironmentName \
+#                  ParameterKey=SystemName,ParameterValue=$SystemName \
+#                  ParameterKey=KeyPair,ParameterValue=${EnvironmentName}-${SystemName}-bastion
+
 AWSTemplateFormatVersion: 2010-09-09
 Description: Create EC2 Resources
 
@@ -25,7 +43,7 @@ Resources:
       GroupName: !Sub ${EnvironmentName}-${SystemName}-sg-bastion
       GroupDescription: !Sub ${EnvironmentName}-${SystemName}
       VpcId: 
-        Fn::ImportValue: !Sub ${EnvironmentName}-VPC
+        Fn::ImportValue: !Sub ${EnvironmentName}-${SystemName}-VPC
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
           FromPort: 22
@@ -56,7 +74,7 @@ Resources:
       SecurityGroupIds:
         - !GetAtt SecurityGroupBastion.GroupId
       SubnetId: 
-        Fn::ImportValue: !Sub ${EnvironmentName}-SubnetPublic1a
+        Fn::ImportValue: !Sub ${EnvironmentName}-${SystemName}-SubnetPublic0101
       Tenancy: default
       UserData:
         Fn::Base64: |
