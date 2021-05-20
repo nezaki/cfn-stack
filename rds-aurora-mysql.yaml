@@ -21,6 +21,9 @@ Parameters:
   EnvironmentName:
     Description: An environment name that will be prefixed to resource names
     Type: String
+    AllowedValues:
+      - dev
+      - prod
 
   SystemName:
     Description: Name of this system.
@@ -33,6 +36,13 @@ Parameters:
   DBName:
     Description: Please enter the name of the Database Name.
     Type: String
+
+Mappings:
+ EnvironmentMap:
+   dev:
+     DBInstanceClass: db.t3.small
+   prod:
+     DBInstanceClass: db.m5.large
 
 Resources:
   AuroraMasterPassword:
@@ -127,7 +137,7 @@ Resources:
     Properties:
       Engine: aurora-mysql
       DBClusterIdentifier: !Ref DBCluster
-      DBInstanceClass: db.t3.small
+      DBInstanceClass: !FindInMap [ EnvironmentMap, !Ref EnvironmentName, DBInstanceClass ]
       DBSubnetGroupName: !Ref DBSubnetGroup
       DBParameterGroupName: !Ref DBParameterGroup
       DBInstanceIdentifier : !Sub ${EnvironmentName}-${SystemName}-instance1
