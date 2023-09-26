@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  UserName:
+    Type: String
+
+Resources:
+  IAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Sub ${UserName}
+
+  IAMPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: iam-policy-assumerole-only
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Resource: !GetAtt IAMyRole.Arn
+      Users:
+        - !Ref IAMUser
+
+  IAMyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: iam-role-administrator-access
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              AWS:
+                - !GetAtt IAMUser.Arn
+            Condition:
+              Bool:
+                aws:MultiFactorAuthPresent: true
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      MaxSessionDuration: 43200
